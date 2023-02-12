@@ -9,16 +9,22 @@ namespace BlazorPatchDemo.Server.Controllers;
 [Route("items")]
 public class ItemsController : ControllerBase
 {
+    private static readonly Random StaticRandom = new Random();
+    private const int MaxRandom = 5;
+    
     private readonly IRepository<Item> _itemsRepository;
 
     public ItemsController(IRepository<Item> itemsRepository)
     {
-        this._itemsRepository = itemsRepository;
+        _itemsRepository = itemsRepository;
     }
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<ItemDto>>> GetAsync()
     {
+        int i = StaticRandom.Next(MaxRandom);
+        if (i == 0) return Problem("Random failure in GetAsync");
+        
         var items = (await _itemsRepository.GetAllAsync())
             .Select(item => item.AsDto());
 
@@ -30,6 +36,9 @@ public class ItemsController : ControllerBase
     [ActionName("GetByIdAsync")]
     public async Task<ActionResult<ItemDto>> GetByIdAsync(Guid id)
     {
+        int i = StaticRandom.Next(MaxRandom);
+        if (i == 0) return Problem("Random failure in GetByIdAsync");
+
         var item = await _itemsRepository.GetAsync(id);
 
         if (item == null)
@@ -44,6 +53,9 @@ public class ItemsController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<ItemDto>> PostAsync(CreateItemDto createItemDto)
     {
+        int i = StaticRandom.Next(MaxRandom);
+        if (i == 0) return Problem("Random failure in PostAsync");
+
         var item = new Item
         {
             Name = createItemDto.Name,
@@ -61,6 +73,9 @@ public class ItemsController : ControllerBase
     [HttpPut("{id:guid}")]
     public async Task<IActionResult> PutAsync(Guid id, UpdateItemDto updateItemDto)
     {
+        int i = StaticRandom.Next(MaxRandom);
+        if (i == 0) return Problem("Random failure in PutAsync");
+
         var existingItem = await _itemsRepository.GetAsync(id);
 
         if (existingItem == null)
@@ -81,6 +96,9 @@ public class ItemsController : ControllerBase
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> DeleteAsync(Guid id)
     {
+        int i = StaticRandom.Next(MaxRandom);
+        if (i == 0) return Problem("Random failure in DeleteAsync");
+
         var item = await _itemsRepository.GetAsync(id);
 
         if (item == null)

@@ -31,3 +31,8 @@
         content: "An error has occurred."
     }
 
+body {
+    color: #1C1917;
+    background-color: #FAFAF9;
+    margin: 16px 24px;
+}

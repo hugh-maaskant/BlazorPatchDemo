@@ -11,6 +11,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 
+// Add default IProblemDetailsService to the container 
+builder.Services.AddProblemDetails();
+
 builder.Services.AddSwaggerGen(c =>
     c.SwaggerDoc("v1", new OpenApiInfo { Title = title, Version = version }));
 
@@ -37,6 +40,12 @@ else
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+
+// Return a ProblemDetails when returning a non-success Status Code from Controllers
+app.UseStatusCodePages();
+
+// Do not use a path => will return ProblemDetails on Exceptions
+app.UseExceptionHandler();
 
 app.UseHttpsRedirection();
 app.UseBlazorFrameworkFiles();
