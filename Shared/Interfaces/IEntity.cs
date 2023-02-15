@@ -1,4 +1,4 @@
-namespace BlazorPatchDemo.Server.Interfaces;
+namespace BlazorPatchDemo.Shared.Interfaces;
 
 public interface IEntity
 {

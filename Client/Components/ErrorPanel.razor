@@ -1,0 +1,31 @@
+@if (_showPanel)
+{
+    <Panel Type="Panel.PanelType.Error" Title="Error while interacting with the server">
+        <p>@ErrorMessage</p>
+        <p></p>
+        <button class="safe" @onclick="ClearError">
+            Clear Error
+        </button>
+    </Panel>
+}
+
+@code {
+
+    [Parameter, EditorRequired]
+    public string ErrorMessage { get; set; } = string.Empty;
+
+    private bool _showPanel;
+    
+    protected override void OnParametersSet()
+    {
+        _showPanel = !string.IsNullOrEmpty(ErrorMessage);
+        
+        base.OnParametersSet();
+    }
+
+    private void ClearError()
+    {
+        ErrorMessage = string.Empty;
+        _showPanel = false;
+    }
+}

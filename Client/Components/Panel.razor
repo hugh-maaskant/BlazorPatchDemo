@@ -1,0 +1,28 @@
+@using System.Reflection.Metadata
+
+<div class="panel @(Type == PanelType.Standard ? "standard" : "error")">
+    <div class="panel-heading">
+        @Title
+    </div>
+    <div class="panel-body">
+        @ChildContent
+    </div>
+</div>
+
+@code {
+
+    public enum PanelType
+    {
+        Standard,
+        Error,
+    }
+
+    [Parameter] 
+    public PanelType Type { get; set; } = PanelType.Standard;
+    
+    [Parameter, EditorRequired]
+    public string Title { get; set; } = default!;
+    
+    [Parameter, EditorRequired]
+    public RenderFragment ChildContent { get; set; } = default!;
+}

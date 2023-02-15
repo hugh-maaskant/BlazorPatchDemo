@@ -1,5 +1,6 @@
 using System.Linq.Expressions;
 using BlazorPatchDemo.Server.Interfaces;
+using BlazorPatchDemo.Shared.Interfaces;
 using MongoDB.Driver;
 
 namespace BlazorPatchDemo.Server.MongoDB;

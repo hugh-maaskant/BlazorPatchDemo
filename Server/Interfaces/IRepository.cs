@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+using BlazorPatchDemo.Shared.Interfaces;
 
 namespace BlazorPatchDemo.Server.Interfaces;
 

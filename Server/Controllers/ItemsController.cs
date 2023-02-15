@@ -1,17 +1,24 @@
-using BlazorPatchDemo.Server.Entities;
 using BlazorPatchDemo.Server.Interfaces;
 using BlazorPatchDemo.Shared;
+using BlazorPatchDemo.Shared.Dtos;
+using BlazorPatchDemo.Shared.Entities;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BlazorPatchDemo.Server.Controllers;
 
 [ApiController]
 [Route("items")]
-public class ItemsController : ControllerBase
+public sealed class ItemsController : ControllerBase
 {
     private static readonly Random StaticRandom = new Random();
     private const int MaxRandom = 5;
     
+    private static void FailRandomly()
+    {
+        if (StaticRandom.Next(MaxRandom) == 0) 
+            throw new Exception("Random server fail (used for testing only)");
+    }
+
     private readonly IRepository<Item> _itemsRepository;
 
     public ItemsController(IRepository<Item> itemsRepository)
@@ -22,8 +29,7 @@ public class ItemsController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<ItemDto>>> GetAsync()
     {
-        int i = StaticRandom.Next(MaxRandom);
-        if (i == 0) return Problem("Random failure in GetAsync");
+        FailRandomly();
         
         var items = (await _itemsRepository.GetAllAsync())
             .Select(item => item.AsDto());
@@ -36,33 +42,23 @@ public class ItemsController : ControllerBase
     [ActionName("GetByIdAsync")]
     public async Task<ActionResult<ItemDto>> GetByIdAsync(Guid id)
     {
-        int i = StaticRandom.Next(MaxRandom);
-        if (i == 0) return Problem("Random failure in GetByIdAsync");
+        FailRandomly();
 
         var item = await _itemsRepository.GetAsync(id);
 
         if (item == null)
-        {
             return NotFound();
-        }
 
         return item.AsDto();
     }
 
     // POST /items
     [HttpPost]
-    public async Task<ActionResult<ItemDto>> PostAsync(CreateItemDto createItemDto)
+    public async Task<ActionResult<ItemDto>> PostAsync(ItemToCreateDto itemToCreateDto)
     {
-        int i = StaticRandom.Next(MaxRandom);
-        if (i == 0) return Problem("Random failure in PostAsync");
+        FailRandomly();
 
-        var item = new Item
-        {
-            Name = createItemDto.Name,
-            Description = createItemDto.Description,
-            Price = createItemDto.Price,
-            CreatedDate = DateTimeOffset.UtcNow
-        };
+        var item = itemToCreateDto.ToItem(Guid.NewGuid(), DateTimeOffset.UtcNow);
 
         await _itemsRepository.CreateAsync(item);
             
@@ -71,21 +67,20 @@ public class ItemsController : ControllerBase
 
     // PUT /items/{id}
     [HttpPut("{id:guid}")]
-    public async Task<IActionResult> PutAsync(Guid id, UpdateItemDto updateItemDto)
+    public async Task<IActionResult> PutAsync(Guid id, ItemToUpdateDto itemToUpdateDto)
     {
-        int i = StaticRandom.Next(MaxRandom);
-        if (i == 0) return Problem("Random failure in PutAsync");
+        FailRandomly();
 
         var existingItem = await _itemsRepository.GetAsync(id);
 
-        if (existingItem == null)
+        if (existingItem is null)
         {
             return NotFound();
         }
 
-        existingItem.Name = updateItemDto.Name;
-        existingItem.Description = updateItemDto.Description;
-        existingItem.Price = updateItemDto.Price;
+        existingItem.Name = itemToUpdateDto.Name;
+        existingItem.Description = itemToUpdateDto.Description;
+        existingItem.Price = itemToUpdateDto.Price;
 
         await _itemsRepository.UpdateAsync(existingItem);
             
@@ -96,18 +91,10 @@ public class ItemsController : ControllerBase
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> DeleteAsync(Guid id)
     {
-        int i = StaticRandom.Next(MaxRandom);
-        if (i == 0) return Problem("Random failure in DeleteAsync");
+        FailRandomly();
 
-        var item = await _itemsRepository.GetAsync(id);
+        await _itemsRepository.RemoveAsync(id);
 
-        if (item == null)
-        {
-            return NotFound();
-        }
-
-        await _itemsRepository.RemoveAsync(item.Id);
-            
         return NoContent();
     }
 }

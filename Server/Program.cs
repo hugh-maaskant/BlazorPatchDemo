@@ -1,6 +1,6 @@
-﻿using BlazorPatchDemo.Server.Entities;
-using BlazorPatchDemo.Server.MongoDB;
+﻿using BlazorPatchDemo.Server.MongoDB;
 using BlazorPatchDemo.Server.Settings;
+using BlazorPatchDemo.Shared.Entities;
 using Microsoft.OpenApi.Models;
 
 const string title = "BlazorPatchDemo.Catalog.Service";

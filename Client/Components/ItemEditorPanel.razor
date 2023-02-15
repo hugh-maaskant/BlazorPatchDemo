@@ -1,0 +1,88 @@
+@using BlazorPatchDemo.Shared.Entities
+@using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Components.Forms
+
+@if (ItemToEdit is not null)
+{
+    <Panel Type="Panel.PanelType.Standard" Title="@Title">
+        <EditForm EditContext="@_context"
+                  OnValidSubmit=@SubmitValidEdit>
+
+            <DataAnnotationsValidator/>
+            <div class="row">
+                <label for="Name">Name</label><br/>
+                <InputText @bind-Value="ItemToEdit.Name" id="Name"></InputText>
+            </div>
+            <p></p>
+            <div class="row">
+                <label for="Description">Description</label><br/>
+                <InputText @bind-Value="ItemToEdit!.Description" id="Description"></InputText>
+            </div>
+            <p></p>
+            <div class="row">
+                <label for="Price">Price</label><br/>
+                <InputNumber @bind-Value="ItemToEdit!.Price" id="Price"></InputNumber>
+            </div>
+            <p></p>
+            <ValidationSummary/>
+            <p></p>
+            <div class="button-group">
+                <button class="safe" type="button" @onclick="QuitEdit">
+                    Quit
+                </button>
+                <button class="safe" type="button" @onclick="ResetForm">
+                    Reset
+                </button>
+                <button class="safe" type="submit">
+                    Submit
+                </button>
+            </div>
+        </EditForm>
+
+    </Panel>
+}
+
+@code {
+    
+    [Parameter, EditorRequired]
+    public string Title { get; set; } = string.Empty;
+
+    [Parameter, EditorRequired]
+    public Item ItemToEdit { get; set; } = null!;
+    
+    [Parameter, EditorRequired]
+    public EventCallback OnValidSubmit { get; set; }
+
+    [Parameter, EditorRequired]
+    public EventCallback OnQuitEdit { get; set; }
+
+    private EditContext _context = null!;
+    private Item _saveItem = null!;
+    
+    
+    protected override void OnParametersSet()
+    {
+        _saveItem = ItemToEdit.Clone();
+        _context = new EditContext(ItemToEdit);
+
+        base.OnParametersSet();
+    }
+
+    private async Task SubmitValidEdit() => await
+        (ItemToEdit.Name != _saveItem.Name ||
+         ItemToEdit.Description != _saveItem.Description ||
+         ItemToEdit.Price != _saveItem.Price
+            ? OnValidSubmit.InvokeAsync()
+            : OnQuitEdit.InvokeAsync());
+    
+
+    private async Task QuitEdit() => await OnQuitEdit.InvokeAsync();
+    
+    private void ResetForm()
+    {
+        ItemToEdit.Name = _saveItem.Name;
+        ItemToEdit.Description = _saveItem.Description;
+        ItemToEdit.Price = _saveItem.Price;
+    }
+
+}

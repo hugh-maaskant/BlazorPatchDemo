@@ -1,271 +1,305 @@
 ﻿@page "/"
 
-@using System.Net.Http.Json
-@using BlazorPatchDemo.Shared
+@using Microsoft.Extensions.Logging
 
+@using BlazorPatchDemo.Shared
+@using BlazorPatchDemo.Shared.Entities
+@using BlazorPatchDemo.Client.Components
+@using BlazorPatchDemo.Shared.Dtos
+
+@inject ILogger<Index> Logger
 @inject HttpClient Client
 
-<h1>Catalog</h1>
+<h2>Catalog Item Editor</h2>
 
-@if (_items is null)
+@if (_loading)
 {
-    <p>Loading items, please wait ...</p>
+    <p>Loading Catalog items, please wait ...</p>
 }
 else
 {
-    <h4>Catalog Items Summaries</h4>
-    <div class="overflow-x-auto">
-        <table>
-            <thead>
-            <tr>
-                <th style="width: 40%">Name</th>
-                <th style="width: 10%">Price (Gill)</th>
-                <th style="width: 20%">Created</th>
-                <th style="width: 30%">Actions</th>
-            </tr>
-            </thead>
-            <tbody>
-            @foreach (var item in _items)
-            {
-                <tr>
-                    <td>@item.Name</td>
-                    <td style="text-align:right;">@item.Price</td>
-                    <td>@item.CreatedDate.ToString("yyyy-MM-dd   hh:mm:ss")</td>
-                    <td>
-                        <button class="attention" @onclick="() => EditItem(item)">
-                            Edit
-                        </button>
-                        <button class="danger" @onclick="() => Delete(item)">
-                            Delete
-                        </button>
-                    </td>
-                </tr>
-            }
-            <tr>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td>
-                    <button class="attention" @onclick="CreateItem">
-                        Create
-                    </button>
-                </td>
-            </tr>
-            </tbody>
-        </table>
-    </div>
+    <ItemSummariesPanel
+        Items="@_items"
+        OnRefresh="@Refresh" 
+        OnEditItem="@EditItem" 
+        OnDeleteItem="@DeleteItem" 
+        OnCreateItem="@CreateItem"
+    >
+    </ItemSummariesPanel>
     
-    <div style="margin-top: 16px;">
-        <button class="safe" @onclick="Refresh">
-            Refresh
-        </button>
-    </div>
+    @switch (_editState)
+    {
+        case EditState.None:
+            break;
+            
+        case EditState.Creating:
+            <ItemEditorPanel    
+                Title="Create a new Item"
+                ItemToEdit="@_editItem"
+                OnValidSubmit="@HandleCreateSubmitted"
+                OnQuitEdit="@HandleQuitEditing">
+            </ItemEditorPanel>
+            break;
+            
+        case EditState.Editing:
+            <ItemEditorPanel
+                Title=@($"Update Item {_editItem!.Id}")
+                ItemToEdit="@_editItem"
+                OnValidSubmit="@HandleEditedSubmitted"
+                OnQuitEdit="@HandleQuitEditing">
+            </ItemEditorPanel>
+            break;
+            
+        default:
+            throw new ArgumentOutOfRangeException();
+    }
 
-    <div>
-        @if (_editState != EditState.None)
-        {
-            <p>Editstate = @_editState.ToString()</p>
-        }
-    </div>
-    
-    <div>
-        @if (!string.IsNullOrEmpty(_error))
-        {
-            <h4>Error while interacting with the server:</h4>
-            <p>@_error</p>
-            <p></p>
-            <button class="safe" @onclick="ClearError">
-                Clear Error
-            </button>
-        }
-    </div>
+    <ErrorPanel 
+        ErrorMessage="@_error">
+    </ErrorPanel>
 }
 
 
 @code {
 
-    enum EditState
+    public enum EditState
     {
         None, Creating, Editing
     }
 
-    Random _random = new();
+    private bool _loading;
     
-    List<ItemDto>? _items;
+    // Contains the editable versions of the Items received from the server
+    private List<Item> _items = new();
+    
+    private EditState _editState = EditState.None;
+    
+    // Item being Edited or Created
+    private Item _editItem = null!;
 
-    EditState _editState = EditState.None;
+    // A copy of the Item being edited to roll back to if the Server update fails
+    private Item _saveItem = null!;
 
+    // Any Error will set this string, causing the ErrorPanel to appear
     string _error = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
+        Logger.LogInformation("Initializing ...");
+
+        _items = await HttpGetItemsAsync();
+        
+        Logger.LogInformation("Items initialized with {Count} Items", _items.Count);
+
+        _loading = false;
+    }
+
+    // Initiate a Creation - called from Create button OnClick event
+    private void CreateItem()
+    {
+        _editItem = new Item(Guid.Empty, DateTimeOffset.UtcNow);
+        _editState = EditState.Creating;        // Show the form
+    }
+
+    private async Task HandleCreateSubmitted()
+    {
+        ItemToCreateDto itemToCreateDto = _editItem.AsCreateDto();
+
+        Item? item = await HttpPostItemAsync(itemToCreateDto);
+
+        if (item is not null)
+            _items.Add(item);
+
+        _editState = EditState.None;
+    }
+
+    // Initiate an Edit - called from Edit button OnClick event
+    private void EditItem(Item item)
+    {
+        _editItem = item;                   // Edit the original
+        _saveItem = item.Clone();           // Save a copy in case the Server update fails after editing
+        _editState = EditState.Editing;     // Show the ItemEditorPanel
+    }
+    
+    // Process an Edited Item - callback from the ItemEditorPanel
+    private async Task HandleEditedSubmitted()
+    {
+        // ToDo: use Patch if the Description was not modified (for smaller payload)
+        if (!await HttpPutItemAsync(_editItem!.Id, _editItem.AsUpdateDto()))
+        {
+            // roll back the edit
+            _editItem.Name = _saveItem.Name;
+            _editItem.Description = _saveItem.Description;
+            _editItem.Price = _saveItem.Price;
+        }
+
+        _editState = EditState.None;        
+    }
+    
+    // Quit any Edit, - called as Callback event form the ItemEditor
+    private void HandleQuitEditing()
+    {
+        _editState = EditState.None;
+        _editItem = null!;
+    }
+
+    // Delete the Item from the Server - called from Delete button OnClick event
+    private async Task DeleteItem(Item item)
+    {
+        if (await HttpDeleteItemAsync(item))
+            _items.Remove(item);
+    }
+
+    private async Task Refresh()
+    {
+        List<Item> items = await HttpGetItemsAsync();
+
+        if (string.IsNullOrEmpty(_error))
+            _items = items;
+    }
+
+    private async Task<List<Item>> HttpGetItemsAsync()
+    {
+        List<Item> items = new();
+        
         try
         {
-            _items = await Client.GetFromJsonAsync<List<ItemDto>>("items");
+            List<ItemDto>? dtos = await Client.GetFromJsonAsync<List<ItemDto>>("items");
             
-            if (_items is not null)
+            if (dtos is not null)
             {
-                Console.WriteLine($"Initialize retrieved {_items.Count} Items.");
+                Logger.LogInformation("HttpGetItemsAsync retrieved {Count} Items", dtos.Count);
+                
+                // Convert every received ItemDto to an Item
+                items = dtos.Select(dto => dto.ToItem()).ToList();
                 _error = string.Empty;
             }
             else
             {
-                _items = new List<ItemDto>();   // Ensure the UI gets out of Loading message state
-                _error = $"Error initializing Items from Server.";
+                Logger.LogError("Error getting Items from the Server");
+                _error = $"Error getting Items from the Server";
             }
         }
         catch (HttpRequestException e)
         {
-            _items = new List<ItemDto>();   // Ensure the UI gets out of Loading message state
-            _error = $"Exception initializing Items from Server; Status={e.StatusCode}, Message=\"{e.Message}\"";
+            Logger.LogError("Exception getting Items from Server; Status={StatusCode}, Message=\"{Message}\"",
+                e.StatusCode, e.Message);
+            _error = $"Exception getting Items from Server; Status={e.StatusCode}, Message=\"{e.Message}\"";
         }
-        
-        if (!string.IsNullOrEmpty(_error))
-            Console.WriteLine(_error);
+
+        return items;
     }
 
-    private async Task CreateItem()
+    private async Task<Item?> HttpPostItemAsync(ItemToCreateDto itemToCreateDto)
     {
-        _editState = EditState.Creating;
+        Item? item = null;
         
-
-        CreateItemDto itemToCreate = 
-            new CreateItemDto("Test", "A short test", _random.Next(30));
-
         try
         {
-            HttpResponseMessage response = await Client.PostAsJsonAsync("/items", itemToCreate);
+            HttpResponseMessage response = await Client.PostAsJsonAsync("/items", itemToCreateDto);
             if (response.IsSuccessStatusCode)
             {
-                ItemDto? item = await response.Content.ReadFromJsonAsync<ItemDto>();
+                ItemDto? dto = await response.Content.ReadFromJsonAsync<ItemDto>();
 
-                if (item is not null)
+                if (dto is not null)
                 {
-                    Console.WriteLine($"Item {item.Name} ({item.Id}) has been created.");
-                    _items!.Add(item);
+                    Logger.LogInformation(
+                        "Item \"{Name}\" with Id {Id} created on {CreatedDate} at {CreatedTime}",
+                        dto.Name, 
+                        dto.Id,
+                        dto.CreatedDate.ToString("yyyy-MM-dd"),
+                        dto.CreatedDate.ToString("hh:mm:ss"));
+                    item = dto.ToItem();
                     _error = string.Empty;
                 }
                 else
                 {
-                    _error = $"Error deserializing Item \"{itemToCreate.Name}\"; Status={response.StatusCode}.";
+                    Logger.LogError("Error deserializing Item \"{Name}\"; Status = {StatusCode},",
+                        itemToCreateDto.Name, response.StatusCode);
+                    _error = $"Error deserializing Item \"{itemToCreateDto.Name}\"; Status={response.StatusCode}";
                 }
             }
             else
             {
-                _error = $"Error creating Item \"{itemToCreate.Name}\"; Status = {response.StatusCode}.";
+                Logger.LogError("Error creating Item \"{Name}\"; Status = {StatusCode},",
+                    itemToCreateDto.Name, response.StatusCode);
+                _error = $"Error creating Item \"{itemToCreateDto.Name}\"; Status = {response.StatusCode}.";
             }
-
         }
         catch (HttpRequestException e)
         {
-            _error = $"Exception creating {itemToCreate.Name}; Status={e.StatusCode}, Message=\"{e.Message}\".";
+            Logger.LogError("Error creating Item \"{Name}\"; Status = {StatusCode}, Message = \"{Message}\"",
+                itemToCreateDto.Name, e.StatusCode, e.Message);
+            _error = $"Exception creating {itemToCreateDto.Name}; Status={e.StatusCode}, Message=\"{e.Message}\".";
         }
-        
-        if (!string.IsNullOrEmpty(_error))
-            Console.WriteLine(_error);
 
-        _editState = EditState.None;
-        StateHasChanged();
+        return item;
     }
-
-    private async Task EditItem(ItemDto item)
+    
+    // Use PUT to update an Item at the Server
+    private async Task<bool> HttpPutItemAsync(Guid id, ItemToUpdateDto dto)
     {
-        _editState = EditState.Editing;
-
-        UpdateItemDto itemToUpdate = new UpdateItemDto(
-            item.Id, item.Name + "_#", item.Description, _random.Next(30));
+        bool success = false;
         
         try
         {
-            HttpResponseMessage response = await Client.PutAsJsonAsync($"/items/{itemToUpdate.Id}", itemToUpdate);
+            HttpResponseMessage response = await Client.PutAsJsonAsync($"items/{id}", dto);
             if (response.IsSuccessStatusCode)
             {
-                Console.WriteLine($"Item {item.Name} ({item.Id}) has been updated.");
-
-                int i = _items!.IndexOf(item);
-                _items[i] = item with 
-                {
-                    Name = itemToUpdate.Name,
-                    Description = itemToUpdate.Description,
-                    Price = itemToUpdate.Price
-                };
-
+                Logger.LogInformation("Item \"{Name}\" has been updated at {Path}",
+                    dto.Name, $"items/{id}");
+                success = true;
                 _error = string.Empty;
             }
             else
             {
-                _error = $"Error editing Item \"{itemToUpdate.Name}\" ({itemToUpdate.Id}); Status = {response.StatusCode}.";
+                Logger.LogError("Error Putting Item \"{Name}\" at {Path}, Status = {StatusCode},",
+                    dto.Name, $"items/{id}", response.StatusCode);
+                _error = $"Error Putting Item \"{dto.Name}\" at items/{id}, Status = {response.StatusCode}";
             }
         }
         catch (HttpRequestException e)
         {
-            _error = ($"Exception editing {itemToUpdate.Name} ({itemToUpdate.Id}); Message=\"{e.Message}\".");
+            Logger.LogError("Error Putting Item \"{Name}\" at {Path}, Message = {Message},",
+                dto.Name, $"items/{id}", e.Message);
+            _error = ($"Exception Put {dto.Name} at at items/{id}, Message=\"{e.Message}\".");
         }
 
-        if (!string.IsNullOrEmpty(_error))
-            Console.WriteLine(_error);
-
-        _editState = EditState.None;
-        StateHasChanged();
+        return success;
     }
 
-    private async Task Delete(ItemDto item)
+    private async Task<bool> HttpDeleteItemAsync(Item item)
     {
+        bool success = false;
+        
         try
         {
             var response = await Client.DeleteAsync($"items/{item.Id}");
 
             if (response.IsSuccessStatusCode)
             {
-                Console.WriteLine($"Item {item.Name} ({item.Id}) has been deleted");
-                
-                _ = _items!.Remove(item);
+                Logger.LogInformation("Item \"{Name}\" with Id {Id} has been deleted",
+                    item.Name, item.Id);
+
+                success = true;
                 _error = string.Empty;
             }
             else
             {
+                Logger.LogError("Error deleting Item \"{Name}\" with Id {Id}; Status = {StatusCode}",
+                    item.Name, item.Id, response.StatusCode);
                 _error = $"Error deleting Item \"{item.Name}\" ({item.Id}); Status = {response.StatusCode}.";
             }
 
         }
         catch (HttpRequestException e)
         {
+            Logger.LogError("Exception deleting Item \"{Name}\" with Id {Id}; Status = {StatusCode}, Message = {Message}",
+                item.Name, item.Id, e.StatusCode, e.Message);
             _error = $"Exception deleting {item.Name} ({item.Id}); Message=\"{e.Message}\".";
         }
-        
-        StateHasChanged();
-    }
-    
-    private void ClearError()
-    {
-        _error = string.Empty;
-        StateHasChanged();
+
+        return success;
     }
 
-    private async Task Refresh()
-    {
-        try
-        {
-            _items = await Client.GetFromJsonAsync<List<ItemDto>>("items");
-            
-            if (_items is not null)
-            {
-                Console.WriteLine($"Refresh retrieved {_items.Count} Items from Server.");
-                _error = string.Empty;
-            }
-            else
-            {
-                _error = $"Error refreshing Items from Server.";
-            }
-        }
-        catch (HttpRequestException e)
-        {
-            _error = $"Exception refreshing Items from Server; Status={e.StatusCode}, Message=\"{e.Message}\"";
-        }
-        
-        if (!string.IsNullOrEmpty(_error))
-            Console.WriteLine(_error);
-        
-        StateHasChanged();
-    }
 }

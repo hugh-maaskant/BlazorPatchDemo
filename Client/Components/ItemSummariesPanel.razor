@@ -1,0 +1,80 @@
+@using BlazorPatchDemo.Shared.Entities
+
+<Panel Type="Panel.PanelType.Standard" Title="Item Summaries">
+    <table>
+        <thead class="dark">
+        <tr>
+            <th style="width: 50%">Name</th>
+            <th style="width:  5%">Price</th>
+            <th style="width: 20%">Created</th>
+            <th style="width: 25%">Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var item in Items)
+        {
+            <tr>
+                <td>@item.Name</td>
+                <td style="text-align:right;">@item.Price</td>
+                <td>
+                    @item.CreatedDate.ToString("yyyy-MM-dd")
+                    at
+                    @item.CreatedDate.ToString("HH:mm:ss")
+                </td>
+                <td>
+                    <div class="button-group">
+                        <button class="attention" @onclick="() => EditItem(item)">
+                            Edit
+                        </button>
+                        <button class="danger" @onclick="() => DeleteItem(item)">
+                            Delete
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        }
+        <tr class="last">
+            <td class="last"></td>
+            <td class="last"></td>
+            <td class="last"></td>
+            <td class="last">
+                <div class="button-group">
+                    <button class="attention" @onclick="CreateItem">
+                        Create
+                    </button>
+                    <button class="safe" @onclick="Refresh">
+                        Refresh
+                    </button>
+                </div>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</Panel>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public List<Item> Items { get; set; } = default!;
+    
+    [Parameter, EditorRequired]
+    public EventCallback OnCreateItem { get; set; }
+
+    [Parameter, EditorRequired]
+    public EventCallback<Item> OnEditItem { get; set; }
+    
+    [Parameter, EditorRequired]
+    public EventCallback<Item> OnDeleteItem { get; set; }
+    
+    [Parameter,EditorRequired]
+    public EventCallback OnRefresh { get; set; }
+    
+    private async Task CreateItem() => await OnCreateItem.InvokeAsync();
+
+    private async Task EditItem(Item item) => await OnEditItem.InvokeAsync(item);
+
+    private async Task DeleteItem(Item item) => await OnDeleteItem.InvokeAsync(item);
+
+    private async Task Refresh() => await OnRefresh.InvokeAsync();
+
+}

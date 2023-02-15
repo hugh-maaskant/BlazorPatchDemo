@@ -1,5 +1,6 @@
 using BlazorPatchDemo.Server.Interfaces;
 using BlazorPatchDemo.Server.Settings;
+using BlazorPatchDemo.Shared.Interfaces;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Serializers;
