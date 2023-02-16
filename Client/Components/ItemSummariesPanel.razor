@@ -4,24 +4,20 @@
     <table>
         <thead class="dark">
         <tr>
-            <th style="width: 50%">Name</th>
-            <th style="width:  5%">Price</th>
-            <th style="width: 20%">Created</th>
-            <th style="width: 25%">Actions</th>
+            <th class="name">Name</th>
+            <th sclass="description">Description</th>
+            <th class="price">Price</th>
+            <th class="actions">Actions</th>
         </tr>
         </thead>
         <tbody>
         @foreach (var item in Items)
         {
             <tr>
-                <td>@item.Name</td>
-                <td style="text-align:right;">@item.Price</td>
-                <td>
-                    @item.CreatedDate.ToString("yyyy-MM-dd")
-                    at
-                    @item.CreatedDate.ToString("HH:mm:ss")
-                </td>
-                <td>
+                <td class="overflow-ellipses name">@item.Name</td>
+                <td class="overflow-ellipses description">@item.Description</td>
+                <td class="price">@item.Price</td>
+                <td class="actions">
                     <div class="button-group">
                         <button class="attention" @onclick="() => EditItem(item)">
                             Edit

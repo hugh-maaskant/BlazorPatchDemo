@@ -2,45 +2,45 @@
 @using Microsoft.AspNetCore.Components
 @using Microsoft.AspNetCore.Components.Forms
 
-@if (ItemToEdit is not null)
-{
-    <Panel Type="Panel.PanelType.Standard" Title="@Title">
-        <EditForm EditContext="@_context"
-                  OnValidSubmit=@SubmitValidEdit>
+<Panel Type="Panel.PanelType.Standard" Title="@Title">
+    <EditForm EditContext="@_context"
+              OnValidSubmit=@SubmitValidEdit>
 
-            <DataAnnotationsValidator/>
-            <div class="row">
-                <label for="Name">Name</label><br/>
-                <InputText @bind-Value="ItemToEdit.Name" id="Name"></InputText>
-            </div>
-            <p></p>
-            <div class="row">
-                <label for="Description">Description</label><br/>
-                <InputText @bind-Value="ItemToEdit!.Description" id="Description"></InputText>
-            </div>
-            <p></p>
-            <div class="row">
-                <label for="Price">Price</label><br/>
-                <InputNumber @bind-Value="ItemToEdit!.Price" id="Price"></InputNumber>
-            </div>
-            <p></p>
-            <ValidationSummary/>
-            <p></p>
-            <div class="button-group">
-                <button class="safe" type="button" @onclick="QuitEdit">
-                    Quit
-                </button>
-                <button class="safe" type="button" @onclick="ResetForm">
-                    Reset
-                </button>
-                <button class="safe" type="submit">
-                    Submit
-                </button>
-            </div>
-        </EditForm>
+        <DataAnnotationsValidator/>
+        <div class="row">
+            <label for="Name">Name</label><br/>
+            <InputText @bind-Value="ItemToEdit.Name" id="Name" class="name"></InputText>
+        </div>
+        <p></p>
+        <div class="row">
+            <label for="Description">Description</label><br/>
+            <InputTextArea @bind-Value="ItemToEdit!.Description" id="Description" class="description"></InputTextArea>
+        </div>
+        <p></p>
+        <div class="row">
+            <label for="Price">Price</label><br/>
+            <InputNumber @bind-Value="ItemToEdit!.Price" id="Price" class="price"></InputNumber>
+        </div>
+        <p></p>
+        <ValidationSummary/>
+        <p></p>
+        <div class="button-group" style="justify-content: flex-end">
+            <button class="safe" type="button" @onclick="QuitEdit">
+                Quit
+            </button>
+            <span style="width:24px;"></span>
+            <button class="safe" type="button" @onclick="ResetForm">
+                Reset
+            </button>
+            <span style="width:24px;"></span>
+            <button class="attention" type="submit">
+                Submit
+            </button>
+            <span style="width:40px;"></span>
+        </div>
+    </EditForm>
 
-    </Panel>
-}
+</Panel>
 
 @code {
     

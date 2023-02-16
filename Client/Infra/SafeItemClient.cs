@@ -35,7 +35,7 @@ internal sealed class SafeItemClient
     {
         try
         {
-            var request = new HttpRequestMessage(HttpMethod.Get, $"{_client.BaseAddress}items");
+            var request = new HttpRequestMessage(HttpMethod.Get, "/items");
             request.Headers.Add("Accept", ApplicationJson);
 
             HttpResponseMessage response = await _client.SendAsync(request, token);
@@ -46,8 +46,11 @@ internal sealed class SafeItemClient
 
                 if (dtos is null)
                 {
-                    _logger.LogError("Error deserializing response to List<ItemDto>; StatusCode = {StatusCode}", response.StatusCode);
-                    return ApiResult<List<Item>>.Fail("Cannot deserialize response to List<ItemDto>", response.StatusCode);
+                    _logger.LogError(
+                        "Error deserializing response to List<ItemDto>; StatusCode = {StatusCode}",
+                        response.StatusCode);
+                    return ApiResult<List<Item>>.Fail(
+                        "Cannot deserialize response to List<ItemDto>", response.StatusCode);
                 }
                 
                 // Convert every received ItemDto to an Item
@@ -57,7 +60,8 @@ internal sealed class SafeItemClient
                 return ApiResult<List<Item>>.Success(items, response.StatusCode);
             }
 
-            _logger.LogError("Error retrieving Items from the Server; StatusCode = {StatusCode}", response.StatusCode);
+            _logger.LogError(
+                "Error retrieving Items from the Server; StatusCode = {StatusCode}", response.StatusCode);
             return ApiResult<List<Item>>.Fail("Error Getting Items from the Server", response.StatusCode);
         }
         catch (HttpRequestException e)

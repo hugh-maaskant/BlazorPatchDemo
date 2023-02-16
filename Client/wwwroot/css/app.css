@@ -354,42 +354,13 @@ body.dark {
     color: #1C1917;  /* Tailwind Warm-Gray-900  */
 }
 
-table {
-    width: 100%;
-}
-
-table, th, tr {
-    border-collapse: collapse;
-}
-
-th {
-    padding: 8px 16px;
-    text-align: left;
-    border: 1px solid #44403C;
-    color: #1C1917;
-    background-color: #D6D3D1;  /* Tailwind Warm-Gray-300 */
-}
-
-tr.last {
-    border: none;
-}
-
-td {
-    border: 1px solid #44403C;
-    padding: 6px 16px;
-}
-
-td.last {
-    padding: 24px 16px 8px 16px;
-    border: none;
-}
 
 button {
     border: none;
     border-radius: 12px;
     padding: 6px 0;
     margin: 0;
-    width: 7em;
+    width: 6em;
     text-align: center;
     text-decoration: none;
     display: inline-block;
@@ -447,30 +418,41 @@ label {
     line-height: 1.25em;
 }
 
-input {
-    margin: 8px 0;
+input,
+textarea {
+    margin: 8px 0 0 0;
     padding: 8px 12px;
     display: block;
     border-width: 1px;
     border-color: #78716C;      /* Tailwind Warm-Gray-600 */
-    border-radius: 12px;
-    width: calc(min(64em, 100%));
+    border-radius: 8px;
+    width: 100%;
 }
 
-input:focus {
+textarea {
+    height: 120px;
+    resize: vertical;
+}
+
+input:focus,
+textarea:focus {
     border-color: #44403C;      /* Tailwind Warm-Gray-700 */
     background-color: #F5F5F4;  /* Tailwind Warm-Gray-100 */
 }
 
 input.invalid, 
-input:focus.invalid {
+input:focus.invalid,
+textarea.invalid,
+textarea:focus.invalid{
     border-color: #DC2626;      /* Tailwind Red-700 */
     color:  #7F1D1D;            /* Tailwind Red-900 */
     background-color: #FEF2F2;  /* Tailwind Red-050 */
 }
 
 input.modified.valid,
-input:focus.modified.valid {
+input:focus.modified.valid,
+textarea.modified.valid,
+textarea:focus.modified.valid{
     border-color: #15803D;      /* Tailwind Green-700 */
     color: #14532D;             /* Tailwind Green-900 */
     background-color: #F0FDF4;  /* Tailwind Green-050 */
