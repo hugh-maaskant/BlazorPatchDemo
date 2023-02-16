@@ -19,4 +19,3 @@ public sealed record ItemDto(
 
     DateTimeOffset CreatedDate
 );
-    

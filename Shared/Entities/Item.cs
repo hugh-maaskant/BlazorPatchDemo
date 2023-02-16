@@ -37,9 +37,9 @@ public sealed class Item : IEntity
     /// and all other properties set to their default value.
     /// </summary>
     /// <param name="id">The Id of the Item</param>
-    /// <param name="createdDate">The <see cref="DateTimeOffset"/> at which the Item was created</param>
-    public Item(Guid id, DateTimeOffset createdDate) : 
-        this(id, string.Empty, string.Empty, 0, createdDate)
+    /// <param name="createdAt">The <see cref="DateTimeOffset"/> at which the Item was created</param>
+    public Item(Guid id, DateTimeOffset createdAt) : 
+        this(id, string.Empty, string.Empty, 0, createdAt)
     {
         // Nothing to do
     }
@@ -51,14 +51,14 @@ public sealed class Item : IEntity
     /// <param name="name">The Name of the Item, max string length is 64 characters.</param>
     /// <param name="description">The Name of the Item, max string length is 512 characters.</param>
     /// <param name="price">The Price of the Item, must be between 0 and 1000.</param>
-    /// <param name="createdDate">The <see cref="DateTimeOffset"/> at which the Item was created.</param>
+    /// <param name="createdAtUtc">The <see cref="DateTimeOffset"/> at which the Item was created.</param>
     /// <exception cref="ArgumentException">
     /// when <paramref name="name"/> or <paramref name="description"/> string length is outside its limit.
     /// </exception>
     /// <exception cref="ArgumentOutOfRangeException">
     /// when <paramref name="price"/> is outside its limit.
     /// </exception>
-    public Item(Guid id, string name, string description, decimal price, DateTimeOffset createdDate)
+    public Item(Guid id, string name, string description, decimal price, DateTimeOffset createdAtUtc)
     {
         if (name.Length > MaxNameLength)
             throw new ArgumentException($"{nameof(Name)} cannot be longer than 64 characters ({name.Length}).");
@@ -76,7 +76,7 @@ public sealed class Item : IEntity
         Name = name;
         Description = description;
         Price = price;
-        CreatedDate = createdDate;
+        CreatedDate = createdAtUtc.ToUniversalTime();
     }
 
     /// <summary>
