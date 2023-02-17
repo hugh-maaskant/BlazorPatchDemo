@@ -16,7 +16,7 @@
             <tr class="@(ComputeRowClassValue(item))">
                 <td class="overflow-ellipses name">@item.Name</td>
                 <td class="overflow-ellipses description">@item.Description</td>
-                <td class="price">@item.Price</td>
+                <td class="price">@item.Price.ToString("N0")</td>
                 <td class="actions">
                     <div class="button-group">
                         <button class="attention" @onclick="() => EditItem(item)">
