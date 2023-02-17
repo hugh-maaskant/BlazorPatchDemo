@@ -1,7 +1,13 @@
+@using System.Net
 @if (_showPanel)
 {
     <Panel Type="Panel.PanelType.Error" Title="Error while interacting with the server">
         <p>@ErrorMessage</p>
+        
+        @if (StatusCode is not null)
+        {
+            <p>HttpStatusCode: @StatusCode</p>
+        }
         <p></p>
         <button class="safe" @onclick="ClearError">
             Clear Error
@@ -13,6 +19,9 @@
 
     [Parameter, EditorRequired]
     public string ErrorMessage { get; set; } = string.Empty;
+    
+    [Parameter,EditorRequired]
+    public HttpStatusCode? StatusCode { get; set; }
 
     private bool _showPanel;
     
@@ -26,6 +35,7 @@
     private void ClearError()
     {
         ErrorMessage = string.Empty;
+        StatusCode = null;
         _showPanel = false;
     }
 }
