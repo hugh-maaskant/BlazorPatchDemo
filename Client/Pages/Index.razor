@@ -18,6 +18,7 @@ else
 {
     <ItemSummariesPanel
         Items="@_items"
+        ItemToEditOriginal="@_itemToEditOriginal"
         OnRefresh="@Refresh" 
         OnEditItem="@EditItem" 
         OnDeleteItem="@DeleteItem" 
@@ -33,7 +34,7 @@ else
         case EditState.Creating:
             <ItemEditorPanel    
                 Title="Create a new Item"
-                ItemToEdit="@_editItem"
+                ItemToEdit="@_itemToEdit"
                 OnValidSubmit="@HandleCreateSubmitted"
                 OnQuitEdit="@HandleQuitEditing">
             </ItemEditorPanel>
@@ -41,8 +42,8 @@ else
             
         case EditState.Editing:
             <ItemEditorPanel
-                Title=@($"Update Item {_editItem.Name}")
-                ItemToEdit="@_editItem"
+                Title=@($"Update Item {_itemToEditOriginal!.Name}")
+                ItemToEdit="@_itemToEdit"
                 OnValidSubmit="@HandleEditedSubmitted"
                 OnQuitEdit="@HandleQuitEditing">
             </ItemEditorPanel>
@@ -73,8 +74,11 @@ else
     private EditState _editState = EditState.None;
     
     // Copy of Item being Edited or dummy when being Created
-    private Item _editItem = null!;
+    private Item? _itemToEdit;
     
+    // The original Item being edited
+    private Item? _itemToEditOriginal;
+
     // Any Error will set this string, causing the ErrorPanel to appear
     string _error = string.Empty;
 
@@ -101,23 +105,26 @@ else
     // Initiate a Creation - called from Create button OnClick event
     private void CreateItem()
     {
-        _editItem = new Item(Guid.Empty, DateTimeOffset.UtcNow);
+        _itemToEdit = new Item(Guid.Empty, DateTimeOffset.UtcNow);
         _editState = EditState.Creating;        // Show the form
     }
 
     // Process a Created Item - callback from the ItemEditorPanel
     private async Task HandleCreateSubmitted()
     {
-        var result = await Client.PostItemAsync(_editItem);
+        var result = await Client.PostItemAsync(_itemToEdit!);
 
         if (result.IsSuccess)
         {
             _items.Add(result.Value);
-            _error = string.Empty;
+            
+            _itemToEdit = null;
             _editState = EditState.None;
+            _error = string.Empty;
         }
         else
         {
+            // keep the ItemEditorPanel visible with the entered values still intact, show ErrorPanel
             _error = result.FailureMessage;
         }
     }
@@ -125,7 +132,8 @@ else
     // Initiate an Edit - called from Edit button OnClick event
     private void EditItem(Item item)
     {
-        _editItem = item.Clone();           // Edit a copy
+        _itemToEdit = item.Clone();         // Edit on a copy
+        _itemToEditOriginal = item;         // Save the original
         _editState = EditState.Editing;     // Show the ItemEditorPanel
     }
     
@@ -133,27 +141,25 @@ else
     private async Task HandleEditedSubmitted()
     {
         // ToDo: use Patch if the Description was not modified (for smaller payload)
-        var result = await Client.PutItemAsync(_editItem);
+        var result = await Client.PutItemAsync(_itemToEdit!);
         
         if (result.IsSuccess)
         {
-            // There must be an original at this stage
-            Item original = _items.First(x => x.Id == result.Value.Id);
-            
+            Item serverItem = result.Value;
             // update the original Item in the List with the edited and now persisted values
-            original.Name = result.Value.Name;
-            original.Description = result.Value.Description;
-            original.Price = result.Value.Price;
+            _itemToEditOriginal!.Name = serverItem.Name;
+            _itemToEditOriginal!.Description = serverItem.Description;
+            _itemToEditOriginal!.Price = serverItem.Price;
             
+            // reset the editing state and the UI
+            _itemToEdit = null;
+            _itemToEditOriginal = null;
             _error = string.Empty;
-
-            // remove the ItemEditorPanel from the page
             _editState = EditState.None;
         }
         else
         {
-            // note: keep the ItemEditorPanel visible with the edited values still intact
-            //       only show the error message
+            // keep the ItemEditorPanel visible with the edited values still intact, show ErrorPanel
             _error = result.FailureMessage;
         }
     }
@@ -162,7 +168,8 @@ else
     private void HandleQuitEditing()
     {
         _editState = EditState.None;
-        _editItem = null!;
+        _itemToEditOriginal = null;
+        _itemToEdit = null;
     }
 
     // Delete the Item from the Server - called from Delete button OnClick event

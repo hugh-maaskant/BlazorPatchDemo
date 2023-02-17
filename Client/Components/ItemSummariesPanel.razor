@@ -13,7 +13,7 @@
         <tbody>
         @foreach (var item in Items)
         {
-            <tr>
+            <tr class="@(ComputeRowClassValue(item))">
                 <td class="overflow-ellipses name">@item.Name</td>
                 <td class="overflow-ellipses description">@item.Description</td>
                 <td class="price">@item.Price</td>
@@ -54,6 +54,9 @@
     public List<Item> Items { get; set; } = default!;
     
     [Parameter, EditorRequired]
+    public Item? ItemToEditOriginal { get; set; }
+    
+    [Parameter, EditorRequired]
     public EventCallback OnCreateItem { get; set; }
 
     [Parameter, EditorRequired]
@@ -72,5 +75,9 @@
     private async Task DeleteItem(Item item) => await OnDeleteItem.InvokeAsync(item);
 
     private async Task Refresh() => await OnRefresh.InvokeAsync();
+
+    private string ComputeRowClassValue(Item item) => item == ItemToEditOriginal
+        ? "under-edit"
+        : "none";
 
 }

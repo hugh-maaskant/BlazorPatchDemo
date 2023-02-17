@@ -14,12 +14,12 @@
         <p></p>
         <div class="row">
             <label for="Description">Description</label><br/>
-            <InputTextArea @bind-Value="ItemToEdit!.Description" id="Description" class="description"></InputTextArea>
+            <InputTextArea @bind-Value="ItemToEdit.Description" id="Description" class="description"></InputTextArea>
         </div>
         <p></p>
         <div class="row">
             <label for="Price">Price</label><br/>
-            <InputNumber @bind-Value="ItemToEdit!.Price" id="Price" class="price"></InputNumber>
+            <InputNumber @bind-Value="ItemToEdit.Price" id="Price" class="price"></InputNumber>
         </div>
         <p></p>
         <ValidationSummary/>
@@ -68,6 +68,7 @@
         base.OnParametersSet();
     }
 
+    // Note: Change tracking by the EditContext is unreliable after a ResetForm
     private async Task SubmitValidEdit() => await
         (ItemToEdit.Name != _saveItem.Name ||
          ItemToEdit.Description != _saveItem.Description ||

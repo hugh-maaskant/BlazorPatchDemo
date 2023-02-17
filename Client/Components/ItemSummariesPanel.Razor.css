@@ -15,6 +15,10 @@ th {
     background-color: #D6D3D1;  /* Tailwind Warm-Gray-300 */
 }
 
+tr.under-edit {
+    background-color: #BFDBFE;
+}
+
 tr.last {
     border: none;
 }
