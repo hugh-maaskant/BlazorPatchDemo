@@ -4,9 +4,9 @@ using BlazorPatchDemo.Shared.Entities;
 namespace BlazorPatchDemo.Shared.Dtos;
 
 /// <summary>
-/// A value based representation of an <see cref="Item"/> to be created
+/// A value based representation of an <see cref="Item"/> to be updated
 /// </summary>
-public sealed record ItemToCreateDto(
+public sealed record ItemForUpdateDto(
     
     [Required]
     [MaxLength(Item.MaxNameLength)] 

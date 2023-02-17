@@ -7,6 +7,7 @@ namespace BlazorPatchDemo.Shared.Dtos;
 /// A value based representation of an <see cref="Item"/> for transport between systems
 /// </summary>
 public sealed record ItemDto(
+    
     Guid Id,
 
     [Required]

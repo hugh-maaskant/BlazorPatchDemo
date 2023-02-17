@@ -111,7 +111,10 @@ else
     private void CreateItem()
     {
         _itemToEdit = new Item(Guid.Empty, DateTimeOffset.UtcNow);
-        _editState = EditState.Creating;        // Show the form
+        _itemToEditOriginal = null;
+        _editState = EditState.Creating;
+        _errorMessage = string.Empty;
+        _statusCode = null;
     }
 
     // Process a Created Item - callback from the ItemEditorPanel

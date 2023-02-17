@@ -1,6 +1,4 @@
-﻿using CommunityToolkit.Diagnostics;
-
-namespace BlazorPatchDemo.Client.Infra;
+﻿namespace BlazorPatchDemo.Client.Infra;
 
 /// <summary>
 /// A Result class for errors
@@ -33,8 +31,8 @@ public class Result
     /// <exception cref="ArgumentException"> - when failureMessage is null, empty, or whitespace only.</exception>
     protected Result(string failureMessage) =>
         _failureMessage = string.IsNullOrWhiteSpace(failureMessage)
-            ? ThrowHelper.ThrowArgumentException<string>
-                (nameof(failureMessage), "Cannot be null, empty or whitespace only")
+            ? throw new ArgumentException($"{nameof(failureMessage)} cannot be null or whitespace only",
+                nameof(failureMessage))
             : failureMessage;
 
     /// <summary>
@@ -65,7 +63,7 @@ public class Result
     /// Gets the Failure Message.
     /// </summary>
     /// <exception cref="InvalidOperationException">when accessed while <see cref="IsSuccess"/> is <c>true</c></exception>
-    public string FailureMessage => _failureMessage ?? ThrowHelper.ThrowInvalidOperationException<string>(
+    public string FailureMessage => _failureMessage ?? throw new InvalidOperationException(
             $"{nameof(FailureMessage)} is not defined when IsSuccess is true");
     
     /// <summary>

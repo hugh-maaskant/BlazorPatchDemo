@@ -96,9 +96,9 @@ internal sealed class SafeItemClient
     {
         try
         {
-            ItemToCreateDto itemToCreateDto = item.AsCreateItemDto();
+            ItemForCreateDto itemForCreateDto = item.ToItemForCreateDto();
 
-            var response = await _client.PostAsJsonAsync("/items", itemToCreateDto, token);
+            var response = await _client.PostAsJsonAsync("/items", itemForCreateDto, token);
             if (response.IsSuccessStatusCode)
             {
                 ItemDto? dto = await response.Content.ReadFromJsonAsync<ItemDto>(cancellationToken: token);
@@ -117,14 +117,14 @@ internal sealed class SafeItemClient
                 }
 
                 _logger.LogError("Error deserializing Item \"{Name}\"; Status = {StatusCode},",
-                    itemToCreateDto.Name, response.StatusCode);
-                return ApiResult<Item>.Fail($"Error deserializing Item \"{itemToCreateDto.Name}\"",
+                    itemForCreateDto.Name, response.StatusCode);
+                return ApiResult<Item>.Fail($"Error deserializing Item \"{itemForCreateDto.Name}\"",
                     response.StatusCode);
             }
 
             _logger.LogError("Error creating Item \"{Name}\"; Status = {StatusCode},",
-                itemToCreateDto.Name, response.StatusCode);
-            return ApiResult<Item>.Fail($"Error creating Item \"{itemToCreateDto.Name}\"", response.StatusCode);
+                itemForCreateDto.Name, response.StatusCode);
+            return ApiResult<Item>.Fail($"Error creating Item \"{itemForCreateDto.Name}\"", response.StatusCode);
         }
         catch (HttpRequestException e)
         {
@@ -144,7 +144,7 @@ internal sealed class SafeItemClient
     /// <returns>An <see cref="ApiResult{T}"/> of <see cref="Item"/>.</returns>
     internal async Task<ApiResult<Item>> PutItemAsync(Item item, CancellationToken token = default)
     {
-        ItemToUpdateDto dto = item.AsUpdateItemDto();
+        ItemForUpdateDto dto = item.ToItemForUpdateDto();
 
         try
         {
@@ -187,22 +187,13 @@ internal sealed class SafeItemClient
         if (modified.Id != original.Id)
             throw new ArgumentException("PatchItemsAsync called with different Ids for updated and original Items");
 
-        JsonPatchDocument<Item> patchDocument = new JsonPatchDocument<Item>();
-
-        // Naive creation of the JsonPatchDocument
-        if (modified.Name != original.Name)
-            patchDocument.Replace(path => path.Name, modified.Name);
-        if (modified.Description != original.Description)
-            patchDocument.Replace(path => path.Description, modified.Description);
-        if (modified.Price != original.Price)
-            patchDocument.Replace(path => path.Price, modified.Price);
-
+        JsonPatchDocument<ItemForUpdateDto> patchDocument = CreatePatchDocument(original, modified);
         int patchCount = patchDocument.Operations.Count;
 
         if (patchCount == 0)
         {
             _logger.LogWarning("PatchItemAsync called but the updated and original Items are Identical");
-            return ApiResult<Item>.Success(original, HttpStatusCode.NotModified);
+            return ApiResult<Item>.Success(original);
         }
 
         try
@@ -219,6 +210,22 @@ internal sealed class SafeItemClient
             {
                 _logger.LogInformation("Item \"{Name} with Id {Id} has been patched with {Count} replacements",
                     original.Name, original.Id, patchCount);
+                
+                if (response.StatusCode == HttpStatusCode.OK)
+                {
+                    // Did we get the modified version back ?
+                    ItemDto? responseDto = await response.Content.ReadFromJsonAsync<ItemDto>(cancellationToken: token);
+
+                    if (responseDto is null) 
+                        // Fallback to our copy
+                        return ApiResult<Item>.Success(modified, response.StatusCode);
+                    
+                    // Else, use the response
+                    Item responseItem = responseDto.ToItem();
+                    return ApiResult<Item>.Success(responseItem, response.StatusCode);
+                }
+                
+                // Fallback to our copy
                 return ApiResult<Item>.Success(modified, response.StatusCode);
             }
 
@@ -236,6 +243,22 @@ internal sealed class SafeItemClient
                 $"Exception patching Item \"{original.Name}\" with Id {original.Id}), Message=\"{e.Message}\"",
                 e.StatusCode);
         }
+    }
+
+    private static JsonPatchDocument<ItemForUpdateDto> CreatePatchDocument(Item original, Item modified)
+    {
+        // Note, we are only allowed to PATCH the fields that can be updated, so we use ItemForUpdateDto
+        JsonPatchDocument<ItemForUpdateDto> patchDocument = new JsonPatchDocument<ItemForUpdateDto>();
+
+        // Naive creation of the JsonPatchDocument
+        if (modified.Name != original.Name)
+            patchDocument.Replace(path => path.Name, modified.Name);
+        if (modified.Description != original.Description)
+            patchDocument.Replace(path => path.Description, modified.Description);
+        if (modified.Price != original.Price)
+            patchDocument.Replace(path => path.Price, modified.Price);
+
+        return patchDocument;
     }
 
     /// <summary>

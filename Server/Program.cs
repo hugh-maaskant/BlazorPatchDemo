@@ -8,7 +8,9 @@ const string version = "v1";
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews()
+    .AddNewtonsoftJson();
+
 builder.Services.AddRazorPages();
 
 // Add default IProblemDetailsService to the container 

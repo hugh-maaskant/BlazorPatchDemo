@@ -2,6 +2,7 @@ using BlazorPatchDemo.Server.Interfaces;
 using BlazorPatchDemo.Shared;
 using BlazorPatchDemo.Shared.Dtos;
 using BlazorPatchDemo.Shared.Entities;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BlazorPatchDemo.Server.Controllers;
@@ -32,7 +33,7 @@ public sealed class ItemsController : ControllerBase
         FailRandomly();
         
         var items = (await _itemsRepository.GetAllAsync())
-            .Select(item => item.AsDto());
+            .Select(item => item.ToItemDto());
 
         return Ok(items);
     }
@@ -49,16 +50,16 @@ public sealed class ItemsController : ControllerBase
         if (item == null)
             return NotFound();
 
-        return item.AsDto();
+        return item.ToItemDto();
     }
 
     // POST /items
     [HttpPost]
-    public async Task<ActionResult<ItemDto>> PostAsync(ItemToCreateDto itemToCreateDto)
+    public async Task<ActionResult<ItemDto>> PostAsync(ItemForCreateDto itemForCreateDto)
     {
         FailRandomly();
 
-        var item = itemToCreateDto.ToItem(Guid.NewGuid(), DateTimeOffset.UtcNow);
+        var item = itemForCreateDto.ToItem(Guid.NewGuid(), DateTimeOffset.UtcNow);
 
         await _itemsRepository.CreateAsync(item);
             
@@ -67,7 +68,7 @@ public sealed class ItemsController : ControllerBase
 
     // PUT /items/{id}
     [HttpPut("{id:guid}")]
-    public async Task<IActionResult> PutAsync(Guid id, ItemToUpdateDto itemToUpdateDto)
+    public async Task<IActionResult> PutAsync(Guid id, ItemForUpdateDto itemForUpdateDto)
     {
         FailRandomly();
 
@@ -78,15 +79,39 @@ public sealed class ItemsController : ControllerBase
             return NotFound();
         }
 
-        existingItem.Name = itemToUpdateDto.Name;
-        existingItem.Description = itemToUpdateDto.Description;
-        existingItem.Price = itemToUpdateDto.Price;
+        existingItem.Name = itemForUpdateDto.Name;
+        existingItem.Description = itemForUpdateDto.Description;
+        existingItem.Price = itemForUpdateDto.Price;
 
         await _itemsRepository.UpdateAsync(existingItem);
             
         return NoContent();
     }
 
+    // PATCH /items/{id}
+    [HttpPatch("{id:guid}")]
+    public async Task<ActionResult<ItemDto>> PatchAsync(Guid id, [FromBody] JsonPatchDocument<ItemForUpdateDto> patchDocument)
+    {
+        var existingItem = await _itemsRepository.GetAsync(id);
+
+        if (existingItem is null)
+        {
+            return NotFound();
+        }
+        
+        // Patch is relative to the ItemForUpdateDto
+        var itemForUpdateDto = existingItem.ToItemForUpdateDto();
+        patchDocument.ApplyTo(itemForUpdateDto);
+        
+        existingItem.Name = itemForUpdateDto.Name;
+        existingItem.Description = itemForUpdateDto.Description;
+        existingItem.Price = itemForUpdateDto.Price;
+
+        await _itemsRepository.UpdateAsync(existingItem);
+
+        return existingItem.ToItemDto();
+    }
+    
     // DELETE /items/{id}
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> DeleteAsync(Guid id)

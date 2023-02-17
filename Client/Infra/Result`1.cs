@@ -1,6 +1,4 @@
-﻿using CommunityToolkit.Diagnostics;
-
-namespace BlazorPatchDemo.Client.Infra;
+﻿namespace BlazorPatchDemo.Client.Infra;
 
 /// <summary>
 /// A generically typed Result class for errors
@@ -41,7 +39,7 @@ public class Result<T> : Result
     /// <exception cref="InvalidOperationException"> - if accessed when IsSuccess is <c>false</c></exception>
     public T Value => IsSuccess
         ? _value
-        : ThrowHelper.ThrowInvalidOperationException<T>();
+        : throw new InvalidOperationException($"Cannot access {nameof(Value)} when {nameof(IsSuccess)} is false");
 
     /// <summary>
     /// Factory for Fail <see cref="Result{T}"/> instances.
