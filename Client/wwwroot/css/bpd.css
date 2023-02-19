@@ -1,0 +1,231 @@
+/****************************************************
+*  App specific settings for all Blazor components  *
+****************************************************/
+
+:root {
+    
+    /* Parameters */
+    
+    --header-height: 64px;
+    --footer-height: 40px;
+
+    /* Tailwind standard colors - see https://tailwindcolor.com/ */
+    
+    --warm-gray-025: #FDFDFC;  /* Interpolated from warm-gray-50 */
+    --warm-gray-050: #FAFAF9;
+    --warm-gray-100: #F5F5F4;
+    --warm-gray-200: #E7E5E4;
+    --warm-gray-300: #D6D3D1;
+    --warm-gray-400: #A8A29E;
+    --warm-gray-500: #78716C;
+    --warm-gray-600: #57534E;
+    --warm-gray-700: #44403C;
+    --warm-gray-800: #292524;
+    --warm-gray-900: #1C1917;
+    
+    --red-050: #FEF2F2;
+    --red-100: #FEE2E2;
+    --red-500: #EF4444;
+    --red-600: #DC2626;
+    --red-700: #B91C1C;
+    --red-800: #991B1B;
+    --red-900: #7F1D1D;
+    
+    --green-050: #F0FDF4;
+    --green-100: #DCFCE7;
+    --green-600: #16A34A;
+    --green-700: #15803D;
+    --green-900: #14532D;
+    
+    --blue-050: #EFF6FF;
+    --blue-100: #DBEAFE;
+    --blue-600: #2563EB;
+    --blue-700: #1D4ED8;
+    --blue-900: #1E3A8A;
+}
+
+.bpd-wrapper {
+    height: 100vh;
+    width: 100vw;
+    display: grid;
+    grid-template-rows: var(--header-height) 1fr var(--footer-height);
+}
+
+header {
+    display: flex;
+    flex-direction: row;
+    padding: 0 24px;
+    width: 100%;
+    vertical-align: middle;
+}
+
+body {
+    /*
+    --body-height: calc(100vh - (var(--header-height) + var(--footer-height)));
+    min-height: var(--body-height);
+    max-height: var(--body-height);
+     */
+    max-width: 1280px;
+    padding: 0;
+    margin: 0 auto;
+    color: var(--warm-gray-800);
+    background-color: var(--warm-gray-025);
+}
+
+body.dark {
+    color: var(--warm-gray-900);
+}
+
+footer {
+    padding: 10px 20px 10px 20px;
+}
+
+.row {
+    margin-top: 4px;
+    margin-bottom: 12px;
+}
+
+/***********
+*  Panels  *
+***********/
+
+.panel {
+    display: block;
+    margin: 24px 0;
+    border-top-width: 4px;
+    border-top-color: var(--warm-gray-900);  /* Tailwind Warm-Gray-900 */
+    border-top-style: solid;
+}
+
+.panel.error {
+    border-top-color: var(--red-700);     /* Tailwind Red-700 */
+}
+
+.panel-heading {
+    padding: 8px 16px;
+    color: var(--warm-gray-900);
+    background-color: var(--warm-gray-400);
+    font-weight: bolder;
+    line-height: 1.25em;
+    border-bottom-width: 1px;
+    border-bottom-color: var(--warm-gray-500);
+    border-bottom-style: solid;
+}
+
+.panel-body {
+    padding: 16px 16px;
+    background-color: var(--warm-gray-200);
+}
+
+/**********
+*  Forms  *
+**********/
+
+label {
+    color: var(--warm-gray-900);
+    font-size: smaller;
+    font-weight: bolder;
+    line-height: 1.25em;
+}
+
+input,
+textarea {
+    margin: 8px 0 0 0;
+    padding: 8px 12px;
+    display: block;
+    border-width: 1px;
+    border-color: var(--warm-gray-600);
+    border-radius: 8px;
+    width: 100%;
+}
+
+textarea {
+    height: 120px;
+    resize: vertical;
+}
+
+input:focus,
+textarea:focus {
+    border-color: var(--warm-gray-700);      /* Tailwind Warm-Gray-700 */
+    background-color: var(--warm-gray-100);
+}
+
+input.invalid,
+input:focus.invalid,
+textarea.invalid,
+textarea:focus.invalid{
+    border-color: var(--red-700);
+    color:  var(--red-900);
+    background-color: var(--red-050);
+}
+
+input.modified.valid,
+input:focus.modified.valid,
+textarea.modified.valid,
+textarea:focus.modified.valid{
+    border-color: var(--green-700);
+    color: var(--green-900);
+    background-color: var(--green-050);
+}
+
+.validation-errors {
+    color:  var(--red-900);
+}
+
+input, textarea, button {
+    outline:none;
+}
+
+/************
+*  Buttons  *
+************/
+
+button {
+    border: none;
+    border-radius: 12px;
+    padding: 6px 0;
+    width: 6em;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    transition-duration: 0.5s;
+}
+
+button.safe {
+    background-color: var(--green-600);
+    color: var(--green-100);
+}
+
+button:hover.safe {
+    background-color: var(--green-900);
+    color: var(--green-050);
+}
+
+button.attention {
+    background-color: var(--blue-600);
+    color: var(--blue-100);
+}
+
+button:hover.attention {
+    background-color: var(--blue-900);
+    color: var(--blue-050);
+}
+
+button.danger {
+    background-color: var(--red-500);
+    color: var(--red-100);
+}
+
+button:hover.danger {
+    background-color: var(--red-800);
+    color: var(--red-050);
+}
+
+.button-group {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-evenly;
+    border: none;
+}

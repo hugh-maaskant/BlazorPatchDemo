@@ -1,6 +1,17 @@
-﻿@inherits LayoutComponentBase
+﻿@using BlazorPatchDemo.Client.Components
+
+@inherits LayoutComponentBase
 
 <main>
-    @Body
+    <div class="bpd-wrapper">
+        <header>
+            <BpdHeader />
+        </header>
+        <div>
+            @Body
+        </div>
+        <footer>
+            <BpdFooter />
+        </footer>
+    </div>
 </main>
-

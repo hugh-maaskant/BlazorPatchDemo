@@ -181,7 +181,9 @@ internal sealed class SafeItemClient
     /// <returns>
     /// An <see cref="ApiResult{T}"/> of <see cref="Item"/> with the representation of the Item on the Server.
     /// </returns>
-    /// <exception cref="ArgumentException"></exception>
+    /// <exception cref="ArgumentException">
+    /// when <paramref name="original"/> and <paramref name="modified"/> do not have the same <see cref="Item.Id"/>
+    /// </exception>
     internal async Task<ApiResult<Item>> PatchItemAsync(Item original, Item modified, CancellationToken token = default)
     {
         if (modified.Id != original.Id)

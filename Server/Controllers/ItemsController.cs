@@ -92,6 +92,8 @@ public sealed class ItemsController : ControllerBase
     [HttpPatch("{id:guid}")]
     public async Task<ActionResult<ItemDto>> PatchAsync(Guid id, [FromBody] JsonPatchDocument<ItemForUpdateDto> patchDocument)
     {
+        FailRandomly();
+
         var existingItem = await _itemsRepository.GetAsync(id);
 
         if (existingItem is null)
