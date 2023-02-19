@@ -8,6 +8,8 @@
     
     --header-height: 64px;
     --footer-height: 40px;
+    
+    --content-padding: 0 24px;
 
     /* Tailwind standard colors - see https://tailwindcolor.com/ */
     
@@ -46,27 +48,28 @@
 
 .bpd-wrapper {
     height: 100vh;
-    width: 100vw;
     display: grid;
     grid-template-rows: var(--header-height) 1fr var(--footer-height);
 }
 
 header {
+    padding: var(--content-padding);
     display: flex;
     flex-direction: row;
-    padding: 0 24px;
-    width: 100%;
-    vertical-align: middle;
+    justify-content: space-between;
+    align-items: center;
+    color: var(--warm-gray-200);
+    background-color: var(--warm-gray-900);
 }
 
-body {
-    /*
-    --body-height: calc(100vh - (var(--header-height) + var(--footer-height)));
-    min-height: var(--body-height);
-    max-height: var(--body-height);
-     */
+header.img {
+    height: available;
+    aspect-ratio: auto;
+}
+
+div.body {
     max-width: 1280px;
-    padding: 0;
+    padding: var(--content-padding);
     margin: 0 auto;
     color: var(--warm-gray-800);
     background-color: var(--warm-gray-025);
@@ -77,7 +80,12 @@ body.dark {
 }
 
 footer {
-    padding: 10px 20px 10px 20px;
+    padding: var(--content-padding);
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    color: var(--warm-gray-200);
+    background-color: var(--warm-gray-900);
 }
 
 .row {
