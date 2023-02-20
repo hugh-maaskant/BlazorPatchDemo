@@ -94,18 +94,23 @@ else
     {
         Logger.LogInformation("Initializing ...");
 
+        Status.Message = CallingApi;
+        
         var result = await Client.GetItemsAsync();
 
         if (result.IsSuccess)
         {
             _items = result.Value;
             Logger.LogInformation("Items initialized with {Count} Items from the Server", _items.Count);
+            
             Status.Message = $"Items initialized with {_items.Count} Items from the Server";
         }
         else
         {
             _errorMessage = result.FailureMessage;
             _statusCode = result.StatusCode;
+            Logger.LogError("Could not initialize Items form the Server; StatusCode = {Status}", _statusCode);
+            
             Status.Message = string.Empty;
         }
         
@@ -237,6 +242,8 @@ else
     // Refresh the Items from the Server - called from the Refresh button OnClick event
     private async Task Refresh()
     {
+        Status.Message = CallingApi;
+        
         var result = await Client.GetItemsAsync();
 
         if (result.IsSuccess)
