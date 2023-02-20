@@ -59,12 +59,47 @@ header {
     justify-content: space-between;
     align-items: center;
     color: var(--warm-gray-200);
-    background-color: var(--warm-gray-900);
+    background-color: var(--warm-gray-800);
 }
 
-header.img {
-    height: available;
-    aspect-ratio: auto;
+header.brand {
+    display: inline-flex;
+    flex-direction: row;
+    align-items: center
+}
+
+.brand-logo {
+    border: none;
+    float: left;
+}
+
+.brand-name {
+    display:inline;
+    margin-left: 12px;
+    line-height: 60px;
+    font-size: 1.75em;
+}
+
+header.menu {
+    display: flex;
+    flex-direction: row;
+    justify-content: start;
+    align-items: center;
+}
+
+a.menu-item,
+a:visited.menu-item {
+    text-decoration: none;
+    color: var(--warm-gray-200);
+    font-size: 1.25em;
+}
+
+a:hover.menu-item {
+    color: var(--warm-gray-050);
+}
+
+a:active.menu-item {
+color: var(--warm-gray-200);
 }
 
 div.body {
@@ -85,7 +120,7 @@ footer {
     flex-direction: row;
     align-items: center;
     color: var(--warm-gray-200);
-    background-color: var(--warm-gray-900);
+    background-color: var(--warm-gray-800);
 }
 
 .row {

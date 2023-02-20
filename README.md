@@ -108,7 +108,9 @@ Using one of the answers to [this Stackoverflow question](https://stackoverflow.
 
 * CodeMaze: [Using HttpClient to Send HTTP PATCH Requests in ASP.NET Core](https://code-maze.com/using-httpclient-to-send-http-patch-requests-in-asp-net-core/).
 
-* jsonpatch.com: [general info about JSONPatch](https://jsonpatch.com/) 
+* jsonpatch.com: [general info about JSONPatch](https://jsonpatch.com/)
+
+* Yann Normand: [JSON Merge Patch in .NET Core](https://dev.to/onlyann/json-merge-patch-in-net-core-2g7e).
 
 * IETF: Dusseault, L. and J. Snell, "PATCH Method for HTTP", RFC 5789, DOI 10.17487/RFC5789, March 2010, <[https://www.rfc-editor.org/info/rfc5789](https://www.rfc-editor.org/info/rfc5789)>.
 
