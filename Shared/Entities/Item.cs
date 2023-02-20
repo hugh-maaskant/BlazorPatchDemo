@@ -15,7 +15,7 @@ public sealed class Item : IEntity
     public const int MinPrice =     0;
     public const int MaxPrice = 1_000;
 
-    public Guid Id { get; init; }
+    public Guid Id { get; init; }   // Note: init is required for MongoDB !!!
     
     [Required(ErrorMessage = "Name is required")]
     [StringLength(MaxNameLength, MinimumLength = MinNameLength, 
@@ -30,7 +30,7 @@ public sealed class Item : IEntity
         ErrorMessage = "Price must be between 0 and 1000 inclusive")] 
     public decimal Price { get; set; }
     
-    public DateTimeOffset CreatedDate { get; }
+    public DateTimeOffset CreatedDate { get; init; }    // Note: init is required for MongoDB !!!
     
     /// <summary>
     /// Construct a new <see cref="Item"/> with the initial Id and CreatedDate values
