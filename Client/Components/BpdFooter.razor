@@ -1,5 +1,20 @@
-Blazor Patch Demo Footer
+@using BlazorPatchDemo.Client.Infra
+
+@inject StatusService StatusService
+@implements IDisposable
+
+@StatusService.Message
 
 @code {
+
+    protected override void OnInitialized()
+    {
+        StatusService.OnChange += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        StatusService.OnChange -= StateHasChanged;
+    }
     
 }

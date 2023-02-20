@@ -8,6 +8,7 @@
 
 @inject ILogger<Index> Logger
 @inject SafeItemClient Client
+@inject StatusService Status
 
 <h2>Catalog Item Editor</h2>
 
@@ -69,6 +70,8 @@ else
     }
 
     private bool _loading;
+
+    private const string CallingApi = "Calling the Server API ...";
     
     // Contains the Items received from the server
     private List<Item> _items = new();
@@ -97,10 +100,13 @@ else
         {
             _items = result.Value;
             Logger.LogInformation("Items initialized with {Count} Items from the Server", _items.Count);
+            Status.Message = $"Items initialized with {_items.Count} Items from the Server";
         }
         else
         {
             _errorMessage = result.FailureMessage;
+            _statusCode = result.StatusCode;
+            Status.Message = string.Empty;
         }
         
         // Ensure we will see the ItemsSummaryPanel, even if empty ...
@@ -115,27 +121,36 @@ else
         _editState = EditState.Creating;
         _errorMessage = string.Empty;
         _statusCode = null;
+        
+        Status.Message = string.Empty;
     }
 
     // Process a Created Item - callback from the ItemEditorPanel
     private async Task HandleCreateSubmitted()
     {
+        Status.Message = CallingApi;
+        
         var result = await Client.PostItemAsync(_itemToEdit!);
 
         if (result.IsSuccess)
         {
-            _items.Add(result.Value);
+            Item item = result.Value;
+            _items.Add(item);
             
             _itemToEdit = null;
             _editState = EditState.None;
             _errorMessage = string.Empty;
             _statusCode = null;
+
+            Status.Message = $"Item \"{item.Name}\" has been created at the server with Id {item.Id}";
         }
         else
         {
             // keep the ItemEditorPanel visible with the entered values still intact, show ErrorPanel
             _errorMessage = result.FailureMessage;
             _statusCode = result.StatusCode;
+
+            Status.Message = string.Empty;
         }
     }
 
@@ -145,11 +160,14 @@ else
         _itemToEdit = item.Clone();         // Edit on a copy
         _itemToEditOriginal = item;         // Save the original
         _editState = EditState.Editing;     // Show the ItemEditorPanel
+
+        Status.Message = string.Empty;
     }
     
     // Process an Edited Item - callback from the ItemEditorPanel
     private async Task HandleEditedSubmitted()
     {
+        Status.Message = CallingApi;
 
         // Use PUT when the Description has changed, otherwise use PATCH
         var result = await (_itemToEdit!.Description != _itemToEditOriginal!.Description
@@ -170,12 +188,16 @@ else
             _errorMessage = string.Empty;
             _statusCode = null;
             _editState = EditState.None;
+            
+            Status.Message = $"Item \"{serverItem.Name}\" with Id {serverItem.Id} has been updated at the server.";
         }
         else
         {
             // keep the ItemEditorPanel visible with the edited values still intact, show ErrorPanel
             _errorMessage = result.FailureMessage;
             _statusCode = result.StatusCode;
+            
+            Status.Message = string.Empty;
         }
     }
     
@@ -185,6 +207,8 @@ else
         _editState = EditState.None;
         _itemToEditOriginal = null;
         _itemToEdit = null;
+        
+        Status.Message = string.Empty;
     }
 
     // Delete the Item from the Server - called from Delete button OnClick event
@@ -197,11 +221,15 @@ else
             _items.Remove(item);
             _errorMessage = string.Empty;
             _statusCode = null;
+            
+            Status.Message = $"Item \"{item.Name}\" with Id {item.Id} has been deleted from the server.";
         }
         else
         {
             _errorMessage = result.FailureMessage;
             _statusCode = result.StatusCode;
+            
+            Status.Message = string.Empty;
         }
             
     }
@@ -216,12 +244,16 @@ else
             _items = result.Value;
             _errorMessage = string.Empty;
             _statusCode = null;
+            
+            Status.Message = $"Retrieved {result.Value.Count} Items from the server.";
         }
         else
         {
             // Note: we keep the "old" _items intact
             _errorMessage = result.FailureMessage;
             _statusCode = result.StatusCode;
+            
+            Status.Message = string.Empty;
         }
     }
 }

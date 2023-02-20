@@ -14,8 +14,6 @@ namespace BlazorPatchDemo.Client.Infra;
 /// </remarks>
 public sealed class ApiResult<T> : Result<T>
 {
-    private readonly HttpStatusCode? _statusCode;
-
     // Constructor for Fail ApiResult<T> instances
     private ApiResult(string message, HttpStatusCode? statusCode) : base(message)
     {
@@ -24,7 +22,7 @@ public sealed class ApiResult<T> : Result<T>
                 $"Cannot construct a Fail {nameof(ApiResult<T>)} with HTTP status code < 400 ({statusCode})",
                 nameof(statusCode));
         
-        _statusCode = statusCode;
+        StatusCode = statusCode;
     }
 
     // Constructor for Success ApiResult<T> instances
@@ -35,7 +33,7 @@ public sealed class ApiResult<T> : Result<T>
                 $"Cannot construct a Success {nameof(ApiResult<T>)} with HTTP status code >= 400 ({statusCode})",
                 nameof(statusCode));
 
-        _statusCode = statusCode;
+        StatusCode = statusCode;
     }
 
     /// <summary>
@@ -67,5 +65,5 @@ public sealed class ApiResult<T> : Result<T>
     /// <summary>
     /// Get the <see cref="HttpStatusCode"/> for the sent <see cref="HttpRequestMessage"/>, if any
     /// </summary>
-    public HttpStatusCode? StatusCode => _statusCode;
+    public HttpStatusCode? StatusCode { get; }
 }

@@ -19,18 +19,18 @@ public sealed class Item : IEntity
     
     [Required(ErrorMessage = "Name is required")]
     [StringLength(MaxNameLength, MinimumLength = MinNameLength, 
-        ErrorMessage = $"Name must be between 2 and 64 characters long")]
+        ErrorMessage = "Name must be between 2 and 64 characters long")]
     public string Name { get; set; }
     
     [MaxLength(MaxDescriptionLength,
-        ErrorMessage = $"Description must be at most 512 characters long")]
+        ErrorMessage = "Description must be at most 512 characters long")]
     public string Description { get; set; }
     
     [Range(MinPrice, MaxPrice,
         ErrorMessage = "Price must be between 0 and 1000 inclusive")] 
     public decimal Price { get; set; }
     
-    public DateTimeOffset CreatedDate { get; init; }
+    public DateTimeOffset CreatedDate { get; }
     
     /// <summary>
     /// Construct a new <see cref="Item"/> with the initial Id and CreatedDate values

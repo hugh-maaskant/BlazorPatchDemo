@@ -10,6 +10,7 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 builder.Services.AddHttpClient("ServerAPI",
     client => client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress));
 
+builder.Services.AddSingleton<StatusService>();
 builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("ServerAPI"));
 
 builder.Services.AddScoped<SafeItemClient>();
