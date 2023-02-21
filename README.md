@@ -1,9 +1,13 @@
 # BlazorPatchDemo
 
-BlazorPatchDemo is a simple App demonstrating one way to provide and consume a RESTfull HTTP based API using C# in the .NET Core technology stack. The emphasis of the demo is on  the PATCH operation, using the proposed [JSON Patch](https://www.rfc-editor.org/info/rfc6902) standard. 
+BlazorPatchDemo is a simple App demonstrating one way to provide and consume a RESTfull HTTP based API using C# in the .NET Core technology stack. The emphasis of the demo is on  the PATCH operation, using the proposed [JSON Patch](https://www.rfc-editor.org/info/rfc6902) standard.
 The demo consists of a Blazor WASM Client, an ASP.NET Core based Server, and a shared Library.
 
-The Server has the dual role of hosting the Client and providing the API to the Client. It also persists the resources exposed by the HTTP API as entities in a MongoDB database (running in a Docker container). The Client is a Blazor SPA, providing a basic UI for the manipulation of said resources. Finally, the Shared Library provides the entity class that is shared between the Client and the Server, as well as the DTOs used to transfer representations of the resources between the two. 
+The Server has the dual role of hosting the Client and providing the API to the Client. It also persists the resources exposed by the HTTP API as entities in a MongoDB database (running in a Docker container). The Client is a Blazor SPA, providing a basic UI for the manipulation of said resources. Finally, the Shared Library provides the entity class that is shared between the Client and the Server, as well as the DTOs used to transfer representations of the resources between the two.
+
+_Note_: I created this demo after a discussion with [Julio Casal](https://www.linkedin.com/in/juliocasal) on the semantics and use of POST, PUT, and PATCH in HTTP while following his excellent "[Building Microservices with .NET](https://dotnetmicroservices.com/)" course.
+Rather than keep things theoretical, I wanted to explore how to deal with PATCH in practice. 
+Surprisingly, I could not find much information on how to generate PATCH requests in .NET, so I created this demo to learn. I hope it proves useful to somebody else too.
 
 ## Resources
 
@@ -140,7 +144,7 @@ This demo has (at least ;-) the following limitations:
     
     1. The Server validates the ETag agains its current resource value. If the resource was modified, the ETag will not match and the Server must respond with a 412 `Precondition Failed` Status Code. It is then up to the Client to decide what to do, e.g. give the human user a warning and start over at step 1. If the resource was not modified, it will execute the update and respond as before.
 
-    Note that DELETE is not a problem, as deleting a non-existing resource is handled as a success (the post condition has been met after all).  
+    Note that DELETE is not a problem, as deleting a non-existing resource is handled as a success.  
 
 * **Requires Newtonsoft Json.NET** - the standard .Net System.Text.Json serializer cannot serialize or deserialize the `JsonPatchDocument<T>` type, which is used to represent a JSON Patch document as a .NET object. In stead, the (excellent) Newtonsoft [Json.NET](https://www.newtonsoft.com/json/help/html/Introduction.htm) serializer must be used.
 
