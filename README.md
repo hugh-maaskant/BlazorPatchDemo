@@ -5,7 +5,7 @@ The demo consists of a Blazor WASM Client, an ASP.NET Core based Server, and a s
 
 The Server has the dual role of hosting the Client and providing the API to the Client. It also persists the resources exposed by the HTTP API as entities in a MongoDB database (running in a Docker container). The Client is a Blazor SPA, providing a basic UI for the manipulation of said resources. Finally, the Shared Library provides the entity class that is shared between the Client and the Server, as well as the DTOs used to transfer representations of the resources between the two.
 
-_Note_: I created this demo after a discussion with [Julio Casal](https://www.linkedin.com/in/juliocasal) on the semantics and use of POST, PUT, and PATCH in HTTP while following his excellent "[Building Microservices with .NET](https://dotnetmicroservices.com/)" course.
+_Note_: I created this demo after a discussion with [Julio Casal](https://www.linkedin.com/in/juliocasal) on the semantics and use of POST, PUT, and PATCH in HTTP while following his excellent "[Building Microservices with .NET](https://dotnetmicroservices.com/courses/)" course.
 Rather than keep things theoretical, I wanted to explore how to deal with PATCH in practice. 
 Surprisingly, I could not find much information on how to generate PATCH requests in .NET, so I created this demo to learn. I hope it proves useful to somebody else too.
 
