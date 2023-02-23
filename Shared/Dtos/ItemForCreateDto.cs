@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Newtonsoft.Json;
 using BlazorPatchDemo.Shared.Entities;
 
 namespace BlazorPatchDemo.Shared.Dtos;
@@ -9,12 +10,13 @@ namespace BlazorPatchDemo.Shared.Dtos;
 public sealed record ItemForCreateDto(
     
     [Required]
-    [MaxLength(Item.MaxNameLength)] 
+    [StringLength(Item.MaxNameLength, MinimumLength = Item.MinNameLength)]
     string Name,
-    
+
     [MaxLength(Item.MaxDescriptionLength)]
-    string Description, 
-    
-    [Range(Item.MinPrice, Item.MaxPrice)] 
+    string Description,
+
+    [Required]
+    [Range(Item.MinPrice, Item.MaxPrice)]
     decimal Price
 );

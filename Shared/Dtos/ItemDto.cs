@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Newtonsoft.Json;
 using BlazorPatchDemo.Shared.Entities;
 
 namespace BlazorPatchDemo.Shared.Dtos;
@@ -7,16 +8,21 @@ namespace BlazorPatchDemo.Shared.Dtos;
 /// A value based representation of an <see cref="Item"/> for transport between systems
 /// </summary>
 public sealed record ItemDto(
-    
+
+    [Required]
     Guid Id,
 
     [Required]
-    [MaxLength(Item.MaxNameLength)]
+    [StringLength(Item.MaxNameLength, MinimumLength = Item.MinNameLength)]
     string Name,
 
-    [MaxLength(Item.MaxDescriptionLength)] string Description,
+    [MaxLength(Item.MaxDescriptionLength)]
+    string Description,
 
-    [Range(Item.MinPrice, Item.MaxPrice)] decimal Price,
+    [Required]
+    [Range(Item.MinPrice, Item.MaxPrice)]
+    decimal Price,
 
+    [Required]
     DateTimeOffset CreatedDate
 );
