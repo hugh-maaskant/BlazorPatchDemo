@@ -3,7 +3,7 @@ using BlazorPatchDemo.Server.Settings;
 using BlazorPatchDemo.Shared.Entities;
 using Microsoft.OpenApi.Models;
 
-const string title = "BlazorPatchDemo.Catalog.Service";
+const string title = "BlazorPatchDemo.Catalog";
 const string version = "v1";
 
 var builder = WebApplication.CreateBuilder(args);
@@ -27,8 +27,9 @@ ServiceSettings? serviceSettings = builder.Configuration.GetSection(nameof(Servi
 
 app.Logger.LogInformation("Starting {Title}", title);
 app.Logger.LogInformation("Running in the {Environment} environment", app.Environment.EnvironmentName);
-app.Logger.LogInformation("Using database {Database}", 
-        serviceSettings is null ? "unknown" : serviceSettings.ServiceName);
+app.Logger.LogInformation("Using database {Database}", serviceSettings is not null
+    ? serviceSettings.ServiceName
+    : throw new Exception($"{nameof(ServiceSettings)} has not been configured"));
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
